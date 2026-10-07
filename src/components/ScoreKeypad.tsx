@@ -21,9 +21,9 @@ export const ScoreKeypad: React.FC<ScoreKeypadProps> = ({
   onMoveDown,
 }) => {
   return (
-    <div className="w-full flex justify-center px-2 pt-3 pb-4 shrink-0">
+    <div className="w-full flex justify-center px-1.5 sm:px-3 pt-1.5 pb-2 sm:pb-3 pb-[max(0.5rem,env(safe-area-inset-bottom))] shrink-0 z-10 select-none">
       <div
-        className="w-full max-w-[460px] rounded-[7px] overflow-hidden shadow-lg border border-[#072242]"
+        className="w-full max-w-[480px] rounded-[8px] overflow-hidden shadow-md border border-[#072242]"
         role="group"
         aria-label="Score entry keypad"
       >
@@ -34,7 +34,7 @@ export const ScoreKeypad: React.FC<ScoreKeypadProps> = ({
               key={num}
               type="button"
               onClick={() => onDigit(num)}
-              className="sk-blue-btn h-11 sm:h-12 flex items-center justify-center text-lg sm:text-xl font-medium cursor-pointer select-none"
+              className="sk-blue-btn h-10 xs:h-11 sm:h-12 flex items-center justify-center text-lg sm:text-xl font-medium cursor-pointer select-none"
             >
               {num}
             </button>
@@ -46,9 +46,9 @@ export const ScoreKeypad: React.FC<ScoreKeypadProps> = ({
             onClick={onBackspace}
             title="Backspace (Delete last digit)"
             aria-label="Backspace"
-            className="sk-blue-btn h-11 sm:h-12 flex items-center justify-center cursor-pointer select-none"
+            className="sk-blue-btn h-10 xs:h-11 sm:h-12 flex items-center justify-center cursor-pointer select-none"
           >
-            <Delete className="w-5 h-5 stroke-[2.2]" />
+            <Delete className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.2]" />
           </button>
 
           {/* Undo / Strikeout Toggle */}
@@ -57,7 +57,7 @@ export const ScoreKeypad: React.FC<ScoreKeypadProps> = ({
             onClick={onUndoOrStrike}
             title="Strikeout / Reset score (Excludes score from total like crossed-out 10)"
             aria-label="Strikeout or reset cell"
-            className="sk-blue-btn h-11 sm:h-12 flex items-center justify-center cursor-pointer select-none"
+            className="sk-blue-btn h-10 xs:h-11 sm:h-12 flex items-center justify-center cursor-pointer select-none"
           >
             <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.3]" />
           </button>
@@ -68,9 +68,9 @@ export const ScoreKeypad: React.FC<ScoreKeypadProps> = ({
             onClick={onMoveRight}
             title="Next Player (Right Arrow / Tab)"
             aria-label="Next player"
-            className="sk-blue-btn h-11 sm:h-12 flex items-center justify-center cursor-pointer select-none"
+            className="sk-blue-btn h-10 xs:h-11 sm:h-12 flex items-center justify-center cursor-pointer select-none"
           >
-            <ArrowRight className="w-5 h-5 stroke-[2.5]" />
+            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
           </button>
         </div>
 
@@ -81,7 +81,7 @@ export const ScoreKeypad: React.FC<ScoreKeypadProps> = ({
               key={num}
               type="button"
               onClick={() => onDigit(num)}
-              className="sk-blue-btn h-11 sm:h-12 flex items-center justify-center text-lg sm:text-xl font-medium cursor-pointer select-none"
+              className="sk-blue-btn h-10 xs:h-11 sm:h-12 flex items-center justify-center text-lg sm:text-xl font-medium cursor-pointer select-none"
             >
               {num}
             </button>
@@ -93,7 +93,7 @@ export const ScoreKeypad: React.FC<ScoreKeypadProps> = ({
             onClick={onToggleSign}
             title="Toggle Positive / Negative (±)"
             aria-label="Toggle positive or negative"
-            className="sk-blue-btn h-11 sm:h-12 flex items-center justify-center text-lg sm:text-xl font-medium cursor-pointer select-none"
+            className="sk-blue-btn h-10 xs:h-11 sm:h-12 flex items-center justify-center text-lg sm:text-xl font-medium cursor-pointer select-none"
           >
             ±
           </button>
@@ -104,7 +104,7 @@ export const ScoreKeypad: React.FC<ScoreKeypadProps> = ({
             onClick={onToggleDash}
             title="Mark as Dash / Skipped Turn (—)"
             aria-label="Mark as dash"
-            className="sk-blue-btn h-11 sm:h-12 flex items-center justify-center text-lg sm:text-xl font-bold cursor-pointer select-none"
+            className="sk-blue-btn h-10 xs:h-11 sm:h-12 flex items-center justify-center text-lg sm:text-xl font-bold cursor-pointer select-none"
           >
             —
           </button>
@@ -115,9 +115,9 @@ export const ScoreKeypad: React.FC<ScoreKeypadProps> = ({
             onClick={onMoveDown}
             title="Next Row Down (Down Arrow / Enter)"
             aria-label="Next row down"
-            className="sk-blue-btn h-11 sm:h-12 flex items-center justify-center cursor-pointer select-none"
+            className="sk-blue-btn h-10 xs:h-11 sm:h-12 flex items-center justify-center cursor-pointer select-none"
           >
-            <ArrowDown className="w-5 h-5 stroke-[2.5]" />
+            <ArrowDown className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
           </button>
         </div>
       </div>

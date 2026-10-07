@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Menu, Trophy } from 'lucide-react';
+import { Menu, Trophy, Download } from 'lucide-react';
 import {
   BACKGROUND_THEMES,
   BackgroundName,
@@ -22,7 +22,7 @@ const STORAGE_KEY_ACTIVE = 'scorekeepr_active_game_v1';
 const STORAGE_KEY_SAVED = 'scorekeepr_saved_games_v1';
 
 export default function App() {
-  // Load initial game from localStorage or default to the iconic Star Wars sample game from Screenshot 1
+  // Load initial game from localStorage or default to Star Wars sample game
   const [game, setGame] = useState<GameState>(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY_ACTIVE);
@@ -57,20 +57,48 @@ export default function App() {
   const [isGameInfoOpen, setIsGameInfoOpen] = useState<boolean>(false);
   const [isAboutOpen, setIsAboutOpen] = useState<boolean>(false);
 
+  // PWA Install Prompt State
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+
   // Active selected cell: { row: number, col: number }
-  // Default to row 3, col 2 (Luke's crossed-out 10 in Screenshot 1)
   const [activeCell, setActiveCell] = useState<{ row: number; col: number }>({
     row: 3,
     col: 2,
   });
 
-  // Tracks whether the next digit pressed should overwrite the current cell value or append to it
+  // Tracks whether the next digit pressed should overwrite or append
   const [freshCellEntry, setFreshCellEntry] = useState<boolean>(true);
 
-  // Player rename dialog state (clean custom modal instead of window.prompt)
+  // Player rename dialog state
   const [renamingPlayerIndex, setRenamingPlayerIndex] = useState<number | null>(null);
   const [playerDraftName, setPlayerDraftName] = useState<string>('');
   const playerInputRef = useRef<HTMLInputElement>(null);
+
+  // Container refs for scroll synchronization and auto-scroll
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const totalsContainerRef = useRef<HTMLDivElement>(null);
+
+  // Listen for PWA install prompt
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallPWA = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setInstallPrompt(null);
+    }
+  };
 
   // Persist active game and update saved games list automatically
   useEffect(() => {
@@ -101,12 +129,38 @@ export default function App() {
     }));
   }, [game.rows.length, game.players.length]);
 
+  // Focus rename input
   useEffect(() => {
     if (renamingPlayerIndex !== null && playerInputRef.current) {
       playerInputRef.current.focus();
       playerInputRef.current.select();
     }
   }, [renamingPlayerIndex]);
+
+  // Auto-scroll active cell into view so it's never cut off on mobile
+  useEffect(() => {
+    const activeEl = document.querySelector(`[data-cell="${activeCell.row}-${activeCell.col}"]`);
+    if (activeEl) {
+      activeEl.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'nearest',
+      });
+    }
+  }, [activeCell]);
+
+  // Synchronize horizontal scrolling between table and totals row
+  const handleTableScroll = () => {
+    if (tableContainerRef.current && totalsContainerRef.current) {
+      totalsContainerRef.current.scrollLeft = tableContainerRef.current.scrollLeft;
+    }
+  };
+
+  const handleTotalsScroll = () => {
+    if (tableContainerRef.current && totalsContainerRef.current) {
+      tableContainerRef.current.scrollLeft = totalsContainerRef.current.scrollLeft;
+    }
+  };
 
   const selectCell = useCallback((row: number, col: number) => {
     setActiveCell({ row, col });
@@ -185,9 +239,7 @@ export default function App() {
     setFreshCellEntry(false);
   }, [activeCell]);
 
-  // Counter-clockwise arrow button (↺):
-  // Toggles strikethrough on a non-zero number (like Luke's crossed-out 10 in Screenshot 1 & 8),
-  // or resets to 0 if already struck/dash.
+  // Undo / Strikeout toggle
   const handleUndoOrStrike = useCallback(() => {
     setGame((prev) => {
       const r = Math.min(activeCell.row, prev.rows.length - 1);
@@ -302,7 +354,6 @@ export default function App() {
   // Physical Keyboard Support
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      // Do not intercept if typing in an input or modal is open
       if (
         document.activeElement?.tagName === 'INPUT' ||
         document.activeElement?.tagName === 'TEXTAREA' ||
@@ -388,7 +439,6 @@ export default function App() {
   const handleLoadSampleGame = (variant: 'starwars' | 'tara') => {
     const sample =
       variant === 'starwars' ? createStarWarsSampleGame() : createTaraSampleGame();
-    // Preserve current background/font if user already customized, or use sample's authentic look
     setGame(sample);
     setActiveCell(variant === 'starwars' ? { row: 3, col: 2 } : { row: 5, col: 1 });
     setFreshCellEntry(true);
@@ -547,8 +597,8 @@ export default function App() {
     FONT_OPTIONS.find((f) => f.value === game.font)?.cssClass || 'font-komika';
 
   return (
-    <div className="h-screen w-screen overflow-hidden flex bg-[#111111]">
-      {/* Slide-out Left Menu (pushes main scoreboard to the right just like ScoreKeepR) */}
+    <div className="h-full h-[100dvh] w-screen overflow-hidden flex bg-[#111111]">
+      {/* Slide-out Left Menu */}
       <SideMenu
         isOpen={isMenuOpen}
         game={game}
@@ -572,14 +622,16 @@ export default function App() {
         }}
         onDeleteSavedGame={handleDeleteSavedGame}
         onCloseMenu={() => setIsMenuOpen(false)}
+        installPromptEvent={installPrompt}
+        onInstallPWA={handleInstallPWA}
       />
 
       {/* Main ScoreKeepR Canvas */}
       <div
-        className="flex-1 h-full flex flex-col min-w-0 transition-colors duration-200"
+        className="flex-1 h-full max-h-[100dvh] flex flex-col min-w-0 min-h-0 overflow-hidden transition-colors duration-200"
         style={{ backgroundColor: theme.canvasBg, color: theme.textColor }}
       >
-        {/* Top White Navigation Bar (Exact 3-zone layout matching Screenshots 1, 2, 5, 7, 8) */}
+        {/* Top White Navigation Bar */}
         <header className="h-11 bg-[#f5f5f5] text-[#1a1a1a] border-b border-black/20 px-3 flex items-center justify-between shrink-0 select-none z-20">
           {/* Zone 1: Menu Trigger */}
           <button
@@ -591,23 +643,35 @@ export default function App() {
             <span>Menu</span>
           </button>
 
-          {/* Zone 2: Game Title (Tap to open Game Info / Rename Popover, matching Screenshot 7) */}
+          {/* Zone 2: Game Title (Tap to open Game Info / Rename Popover) */}
           <button
             type="button"
             onClick={() => setIsGameInfoOpen((prev) => !prev)}
             title="Tap to view game info or rename game"
-            className="text-[15px] sm:text-base font-bold text-[#1a1a1a] hover:text-[#246bb2] transition-colors truncate max-w-[55%] cursor-pointer px-2 py-1"
+            className="text-[15px] sm:text-base font-bold text-[#1a1a1a] hover:text-[#246bb2] transition-colors truncate max-w-[50%] sm:max-w-[60%] cursor-pointer px-2 py-1"
           >
             {game.name}
           </button>
 
-          {/* Zone 3: Quick Leaderboard Button */}
+          {/* Zone 3: Quick Leaderboard & Install PWA Button */}
           <div className="flex items-center gap-1">
+            {installPrompt && (
+              <button
+                type="button"
+                onClick={handleInstallPWA}
+                title="Install App as PWA"
+                className="flex items-center gap-1 text-xs font-semibold text-[#246bb2] hover:bg-blue-50 py-1.5 px-2 rounded transition-colors cursor-pointer"
+              >
+                <Download className="w-4 h-4 stroke-[2.2]" />
+                <span className="hidden md:inline">Install</span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={() => setIsLeaderboardOpen(true)}
               title="Open Leaderboard"
-              className="flex items-center gap-1 text-xs font-semibold text-[#333333] hover:text-[#111111] py-1.5 px-2.5 rounded hover:bg-black/5 transition-colors cursor-pointer whitespace-nowrap"
+              className="flex items-center gap-1 text-xs font-semibold text-[#333333] hover:text-[#111111] py-1.5 px-2 sm:px-2.5 rounded hover:bg-black/5 transition-colors cursor-pointer whitespace-nowrap"
             >
               <Trophy className="w-4 h-4 text-[#246bb2]" />
               <span className="hidden sm:inline">Leaderboard</span>
@@ -615,9 +679,9 @@ export default function App() {
           </div>
         </header>
 
-        {/* Scoreboard Scrollable Area */}
+        {/* Scoreboard Area */}
         <main
-          className={`flex-1 overflow-auto px-2 sm:px-6 pt-3 pb-1 flex flex-col justify-between ${fontClass}`}
+          className={`flex-1 min-h-0 overflow-hidden px-2 sm:px-6 pt-1 sm:pt-2 pb-0 flex flex-col justify-between ${fontClass}`}
           style={{ fontSize: `${game.fontSize}px` }}
           onClick={() => {
             if (isMenuOpen && window.innerWidth < 640) {
@@ -625,26 +689,30 @@ export default function App() {
             }
           }}
         >
-          <div className="w-full max-w-5xl mx-auto flex-1 flex flex-col justify-between min-h-0">
-            {/* Scrollable Table Wrapper for up to 99 players & 99 rows */}
-            <div className="w-full flex-1 overflow-auto">
+          <div className="w-full max-w-5xl mx-auto flex-1 min-h-0 flex flex-col justify-between">
+            {/* Scrollable Table Wrapper for players & rows */}
+            <div
+              ref={tableContainerRef}
+              onScroll={handleTableScroll}
+              className="w-full flex-1 min-h-0 overflow-y-auto overflow-x-auto smooth-scroll-container overscroll-contain"
+            >
               <div
-                className="min-w-full"
+                className="min-w-full pb-2"
                 style={{
                   minWidth:
                     game.players.length > 4
-                      ? `${game.players.length * 88}px`
+                      ? `${game.players.length * 84}px`
                       : '100%',
                 }}
               >
-                {/* Player Header Row */}
+                {/* Player Header Row (Sticky at the top while scrolling rows) */}
                 <div
-                  className="grid items-center text-center pb-2 sticky top-0 z-10"
+                  className="grid items-center text-center pb-1.5 pt-1 sticky top-0 z-10"
                   style={{
                     backgroundColor: theme.canvasBg,
                     gridTemplateColumns: game.showRowNumbers
-                      ? `36px repeat(${game.players.length}, minmax(72px, 1fr))`
-                      : `repeat(${game.players.length}, minmax(72px, 1fr))`,
+                      ? `32px repeat(${game.players.length}, minmax(64px, 1fr))`
+                      : `repeat(${game.players.length}, minmax(64px, 1fr))`,
                   }}
                 >
                   {game.showRowNumbers && (
@@ -664,15 +732,15 @@ export default function App() {
                 </div>
 
                 {/* Score Rows */}
-                <div className="space-y-1.5 py-1">
+                <div className="space-y-1 sm:space-y-1.5 py-0.5">
                   {game.rows.map((rowCells, rIdx) => (
                     <div
                       key={rIdx}
                       className="grid items-center text-center"
                       style={{
                         gridTemplateColumns: game.showRowNumbers
-                          ? `36px repeat(${game.players.length}, minmax(72px, 1fr))`
-                          : `repeat(${game.players.length}, minmax(72px, 1fr))`,
+                          ? `32px repeat(${game.players.length}, minmax(64px, 1fr))`
+                          : `repeat(${game.players.length}, minmax(64px, 1fr))`,
                       }}
                     >
                       {game.showRowNumbers && (
@@ -690,13 +758,14 @@ export default function App() {
                           <div key={cIdx} className="px-1 sm:px-2 flex justify-center">
                             <button
                               type="button"
+                              data-cell={`${rIdx}-${cIdx}`}
                               onClick={() => selectCell(rIdx, cIdx)}
                               style={{
                                 backgroundColor: isSelected
                                   ? theme.activeCellBg
                                   : 'transparent',
                               }}
-                              className={`w-full max-w-[160px] py-1 px-2 rounded-[10px] transition-colors duration-100 flex items-center justify-center cursor-pointer tabular-nums ${
+                              className={`w-full max-w-[160px] py-1 px-1.5 sm:px-2 rounded-[10px] transition-colors duration-100 flex items-center justify-center cursor-pointer tabular-nums select-none ${
                                 isSelected ? 'shadow-inner font-bold' : 'hover:bg-white/5'
                               }`}
                             >
@@ -727,29 +796,33 @@ export default function App() {
               </div>
             </div>
 
-            {/* Bottom Totals Bar (Pinned below the horizontal white line, matching Screenshots 1, 5, 7, 8) */}
-            <div className="w-full pt-2 shrink-0 overflow-x-auto">
+            {/* Bottom Totals Bar (Pinned right above Keypad, synchronized horizontal scroll) */}
+            <div
+              ref={totalsContainerRef}
+              onScroll={handleTotalsScroll}
+              className="w-full pt-1.5 pb-0.5 shrink-0 overflow-x-auto smooth-scroll-container"
+            >
               <div
                 style={{
                   minWidth:
                     game.players.length > 4
-                      ? `${game.players.length * 88}px`
+                      ? `${game.players.length * 84}px`
                       : '100%',
                 }}
               >
-                {/* Crisp horizontal line */}
+                {/* Crisp horizontal divider */}
                 <div
-                  className="w-full h-[2px] mb-2"
+                  className="w-full h-[2px] mb-1.5"
                   style={{ backgroundColor: theme.dividerColor }}
                 />
 
                 {/* Player Total Boxes */}
                 <div
-                  className="grid items-center text-center gap-1.5 sm:gap-2.5 pb-1"
+                  className="grid items-center text-center gap-1 sm:gap-2 pb-0.5"
                   style={{
                     gridTemplateColumns: game.showRowNumbers
-                      ? `36px repeat(${game.players.length}, minmax(72px, 1fr))`
-                      : `repeat(${game.players.length}, minmax(72px, 1fr))`,
+                      ? `32px repeat(${game.players.length}, minmax(64px, 1fr))`
+                      : `repeat(${game.players.length}, minmax(64px, 1fr))`,
                   }}
                 >
                   {game.showRowNumbers && <div />}
@@ -762,7 +835,7 @@ export default function App() {
                         onClick={() => setIsLeaderboardOpen(true)}
                         title={`${player}'s Total: ${total} (Tap for Leaderboard)`}
                         style={{ backgroundColor: theme.totalBoxBg }}
-                        className="w-full py-1.5 px-2 rounded-[11px] font-bold tabular-nums truncate cursor-pointer hover:brightness-110 transition-all shadow-xs"
+                        className="w-full py-1 sm:py-1.5 px-1 sm:px-2 rounded-[10px] font-bold tabular-nums truncate cursor-pointer hover:brightness-110 transition-all shadow-xs"
                       >
                         {total}
                       </button>
@@ -774,7 +847,7 @@ export default function App() {
           </div>
         </main>
 
-        {/* Signature 2x8 Blue Glossy Keypad (Zero Ads underneath!) */}
+        {/* Signature 2x8 Blue Glossy Keypad */}
         <ScoreKeypad
           onDigit={handleDigit}
           onBackspace={handleBackspace}
@@ -786,7 +859,7 @@ export default function App() {
         />
       </div>
 
-      {/* Speech Bubble Game Info & Rename Popover (Screenshot 7) */}
+      {/* Speech Bubble Game Info & Rename Popover */}
       <GameInfoPopover
         isOpen={isGameInfoOpen}
         game={game}
@@ -794,7 +867,7 @@ export default function App() {
         onClose={() => setIsGameInfoOpen(false)}
       />
 
-      {/* Leaderboard Modal (Screenshot 3) */}
+      {/* Leaderboard Modal */}
       <LeaderboardModal
         isOpen={isLeaderboardOpen}
         onClose={() => setIsLeaderboardOpen(false)}
