@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4a0808" />
+      <stop offset="100%" stop-color="#1e0202" />
+    </linearGradient>
+    <linearGradient id="btnGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#58a5ea" />
+      <stop offset="48%" stop-color="#246bb2" />
+      <stop offset="52%" stop-color="#155394" />
+      <stop offset="100%" stop-color="#0a3363" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffe259" />
+      <stop offset="100%" stop-color="#ffa751" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-opacity="0.5" />
+    </filter>
+  </defs>
+
+  <!-- Background rounded rect -->
+  <rect width="512" height="512" rx="115" fill="url(#bgGrad)" />
+  
+  <!-- Outer stroke border -->
+  <rect x="8" y="8" width="496" height="496" rx="107" fill="none" stroke="#ff4d4d" stroke-opacity="0.25" stroke-width="6" />
+
+  <!-- Score Board Card / Table Frame -->
+  <g filter="url(#shadow)">
+    <!-- Header bar -->
+    <rect x="76" y="88" width="360" height="64" rx="16" fill="#f8f9fa" />
+    <text x="120" y="130" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="28" font-weight="900" fill="#1e293b" letter-spacing="1">SCORE</text>
+    <text x="310" y="130" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="28" font-weight="900" fill="#246bb2" letter-spacing="1">KEEPR</text>
+    
+    <!-- Scoreboard Grid Rows -->
+    <rect x="76" y="168" width="360" height="152" rx="16" fill="#ffffff" fill-opacity="0.08" stroke="#ffffff" stroke-opacity="0.15" stroke-width="2" />
+    
+    <!-- Grid columns & numbers -->
+    <text x="120" y="212" font-family="'Comic Sans MS', 'Kalam', cursive, sans-serif" font-size="32" font-weight="bold" fill="#ffffff" font-style="italic">25</text>
+    <text x="210" y="212" font-family="'Comic Sans MS', 'Kalam', cursive, sans-serif" font-size="32" font-weight="bold" fill="#ffffff" font-style="italic">18</text>
+    <text x="300" y="212" font-family="'Comic Sans MS', 'Kalam', cursive, sans-serif" font-size="32" font-weight="bold" fill="#ffffff" font-style="italic">30</text>
+    <text x="390" y="212" font-family="'Comic Sans MS', 'Kalam', cursive, sans-serif" font-size="32" font-weight="bold" fill="#ffffff" font-style="italic">12</text>
+    
+    <!-- Row 2 -->
+    <text x="120" y="280" font-family="'Comic Sans MS', 'Kalam', cursive, sans-serif" font-size="32" font-weight="bold" fill="#ffffff" font-style="italic">10</text>
+    <text x="210" y="280" font-family="'Comic Sans MS', 'Kalam', cursive, sans-serif" font-size="32" font-weight="bold" fill="#72b8ff" font-style="italic">50</text>
+    <text x="300" y="280" font-family="'Comic Sans MS', 'Kalam', cursive, sans-serif" font-size="32" font-weight="bold" fill="#ffffff" font-style="italic">15</text>
+    <text x="390" y="280" font-family="'Comic Sans MS', 'Kalam', cursive, sans-serif" font-size="32" font-weight="bold" fill="#ffffff" font-style="italic">22</text>
+
+    <!-- Keypad Glossy Blue Pill Buttons -->
+    <rect x="76" y="344" width="76" height="76" rx="18" fill="url(#btnGrad)" stroke="#0d3c73" stroke-width="2" />
+    <text x="114" y="394" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="36" font-weight="bold" fill="#ffffff">7</text>
+
+    <rect x="170" y="344" width="76" height="76" rx="18" fill="url(#btnGrad)" stroke="#0d3c73" stroke-width="2" />
+    <text x="208" y="394" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="36" font-weight="bold" fill="#ffffff">8</text>
+
+    <rect x="264" y="344" width="76" height="76" rx="18" fill="url(#btnGrad)" stroke="#0d3c73" stroke-width="2" />
+    <text x="302" y="394" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="36" font-weight="bold" fill="#ffffff">9</text>
+
+    <!-- Trophy Badge in Golden Accent -->
+    <rect x="358" y="344" width="78" height="76" rx="18" fill="url(#goldGrad)" stroke="#b37400" stroke-width="2" />
+    <path d="M397 362 C391 362 387 366 387 371 C387 380 393 388 397 392 C401 388 407 380 407 371 C407 366 403 362 397 362 Z" fill="#7a4b00" opacity="0.15" />
+    <path d="M386 364 H408 V376 C408 382 403 387 397 387 C391 387 386 382 386 376 V364 Z" fill="#804a00" />
+    <path d="M381 367 C381 372 385 375 386 375 V367 H381 Z" fill="#804a00" />
+    <path d="M413 367 C413 372 409 375 408 375 V367 H413 Z" fill="#804a00" />
+    <rect x="394" y="387" width="6" height="10" fill="#804a00" />
+    <rect x="389" y="397" width="16" height="5" rx="2" fill="#804a00" />
+  </g>
+</svg>
