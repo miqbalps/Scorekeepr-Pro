@@ -1,0 +1,6 @@
+{
+  "name": "ScoreKeepR — Ad-Free Game Score Tracker",
+  "description": "Clean, ad-free scorekeeper web application inspired by ScoreKeepR with multi-player score grids, custom keypad, leaderboard, customizable fonts and backgrounds, and automatic game saving.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
